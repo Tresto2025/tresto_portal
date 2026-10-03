@@ -9,7 +9,7 @@ export const metadata: Metadata = {
 };
 
 const LAST_UPDATED = "4 October 2026";
-const CONTACT_EMAIL = "hitesh.mehta638@gmail.com";
+const CONTACT_EMAIL = "hitesh@tresto.io";
 const CONTACT_PHONE = "+91 99166 68331";
 const CONTACT_PHONE_HREF = "tel:+919916668331";
 
@@ -188,7 +188,7 @@ export default function PrivacyPage() {
             <p>To ask us to delete your data:</p>
             <ul>
               <li>
-                Email {mail} or <a href="mailto:hitesh@tresto.io">hitesh@tresto.io</a> with the subject <strong>&ldquo;Data deletion request&rdquo;</strong> and include
+                Email {mail} with the subject <strong>&ldquo;Data deletion request&rdquo;</strong> and include
                 the phone number you used to message us.
               </li>
               <li>Or send us a WhatsApp message asking for your data to be deleted.</li>
