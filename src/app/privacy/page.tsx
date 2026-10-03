@@ -71,12 +71,12 @@ export default function PrivacyPage() {
         <div className="max-w-3xl space-y-10">
           <PolicySection id="who-we-are" title="Who we are">
             <p>
-              Tresto (&ldquo;Tresto&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;) is a software and AI automation
+              Tresto (TRESTO.IO, a proprietorship; &ldquo;Tresto&rdquo;, &ldquo;we&rdquo;, &ldquo;us&rdquo;) is a software and AI automation
               studio based in India. We are responsible for the personal data described in this policy.
             </p>
             <ul>
               <li>
-                Registered office: United Growth, House No. 520, Rajeev Nagar, Mandi Dabwali, Sirsa, Haryana
+                Registered office: TRESTO.IO (Proprietorship), House No. 520, Rajeev Nagar, Mandi Dabwali, Sirsa, Haryana
                 125104, India
               </li>
               <li>Email: {mail}</li>
@@ -238,7 +238,7 @@ export default function PrivacyPage() {
                 Phone / WhatsApp: <a href={CONTACT_PHONE_HREF}>{CONTACT_PHONE}</a>
               </li>
               <li>
-                Post: United Growth, House No. 520, Rajeev Nagar, Mandi Dabwali, Sirsa, Haryana 125104, India
+                Post: TRESTO.IO (Proprietorship), House No. 520, Rajeev Nagar, Mandi Dabwali, Sirsa, Haryana 125104, India
               </li>
             </ul>
           </PolicySection>
