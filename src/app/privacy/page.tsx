@@ -188,7 +188,7 @@ export default function PrivacyPage() {
             <p>To ask us to delete your data:</p>
             <ul>
               <li>
-                Email {mail} with the subject <strong>&ldquo;Data deletion request&rdquo;</strong> and include
+                Email {mail} or <a href="mailto:hitesh@tresto.io">hitesh@tresto.io</a> with the subject <strong>&ldquo;Data deletion request&rdquo;</strong> and include
                 the phone number you used to message us.
               </li>
               <li>Or send us a WhatsApp message asking for your data to be deleted.</li>
