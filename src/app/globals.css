@@ -1,0 +1,990 @@
+@import "tailwindcss";
+@config "../../tailwind.config.ts";
+
+/* Design tokens — BUILD_SPEC.md §2. Tailwind v4 reads `@theme` colors,
+   fonts, radii and shadows directly into utilities (bg-ink, text-gold,
+   rounded-pill, shadow-soft, font-display, etc). */
+@theme {
+  /* Brand */
+  --color-ink: #1a1a2e;
+  --color-violet: #5b21b6;
+  --color-violet-deep: #3b1fa8;
+  --color-violet-700: #4c1d95;
+  --color-violet-mid: #2d1b69;
+  --color-gold: #f5c518;
+  --color-violet-soft: #a78bfa;
+
+  /* Section backgrounds (rotate across adjacent sections) */
+  --color-lilac-100: #f0eeff;
+  --color-lilac-50: #f5f3ff;
+  --color-lilac-card: #ede9fe;
+  --color-blue-tint: #eff6ff;
+  --color-pink-tint: #fdf2f8;
+
+  /* Supporting icon tints */
+  --color-emerald: #059669;
+  --color-emerald-bg: #d1fae5;
+  --color-red: #dc2626;
+  --color-red-bg: #fee2e2;
+  --color-blue: #2563eb;
+  --color-blue-bg: #dbeafe;
+  --color-amber: #d97706;
+  --color-amber-bg: #fef3c7;
+
+  /* Neutrals */
+  --color-text-strong: #374151;
+  --color-text-muted: #6b7280;
+  --color-text-faint: #9ca3af;
+  --color-border: #e5e7eb;
+  --color-border-light: #f3f4f6;
+  --color-on-dark-1: #cbd5e1;
+  --color-on-dark-2: #e2e8f0;
+
+  /* Fonts (variables come from next/font in layout.tsx) */
+  --font-display: var(--font-plus-jakarta-sans), ui-sans-serif, system-ui, sans-serif;
+  --font-body: var(--font-inter), ui-sans-serif, system-ui, sans-serif;
+  /* Editorial italic accent — Trusted-by heading only (Trusted.tsx). */
+  --font-accent-serif: var(--font-instrument-serif), Georgia, serif;
+
+  /* Radius */
+  --radius-pill: 999px;
+  --radius-card: 20px;
+  --radius-chip: 13px;
+
+  /* Shadow */
+  --shadow-soft: 0 4px 20px rgba(0, 0, 0, 0.04);
+  --shadow-card-hover: 0 16px 40px rgba(91, 33, 182, 0.12);
+}
+
+/* Single-page nav: smooth in-page scrolling, offset so the sticky navbar
+   doesn't cover the section heading it jumps to. */
+html {
+  scroll-behavior: smooth;
+}
+
+#services,
+#work,
+#about,
+#tech,
+#faq,
+#contact {
+  scroll-margin-top: 90px;
+}
+
+/* Composite tokens that Tailwind's @theme namespaces don't cover 1:1
+   (multi-property type scale, letter-spacing, gradient backgrounds). */
+@layer components {
+  .text-display {
+    font-family: var(--font-display);
+    font-size: 2.125rem; /* ~34px per BUILD_SPEC §7 mobile guidance */
+    line-height: 1.15;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+
+  @media (min-width: 1024px) {
+    .text-display {
+      font-size: 3.5rem;
+      line-height: 1.1;
+    }
+  }
+
+  .text-section-title {
+    font-family: var(--font-display);
+    font-size: 2.375rem;
+    line-height: 1.2;
+    font-weight: 800;
+    letter-spacing: -0.02em;
+  }
+}
+
+@layer utilities {
+  .tracking-label {
+    letter-spacing: 0.07em;
+  }
+
+  .bg-hero-gradient {
+    background-image: linear-gradient(135deg, #1a1a2e 0%, #2d1b69 50%, #1e3a5f 100%);
+  }
+
+  .bg-footer-gradient {
+    background-image: linear-gradient(160deg, #f5f3ff 0%, #eff6ff 50%, #fdf2f8 100%);
+  }
+
+  /* First-section top clearance for the fixed, floating navbar (S2). The
+     navbar is `position: fixed` and no longer reserves flow space, so
+     every page's first section needs this on its own Section wrapper —
+     not on a separate spacer element above it — so the section's own
+     background still paints all the way to y=0 behind the pill (a
+     padding-box's background isn't clipped by its own padding) while the
+     content inside clears the pill. `!important` is intentional: it
+     overrides Section's own `py-16`/`py-[90px]` padding-top
+     deterministically, since two same-specificity utility classes would
+     otherwise depend on Tailwind's internal stylesheet ordering rather
+     than the order they're written in a className string. */
+  .hero-offset-top {
+    padding-top: 150px !important;
+  }
+
+  /* Tech Stack vertical marquee (S14) — each column's tool list is
+     rendered twice back-to-back, so translating exactly one copy's height
+     (-50%) lands on a duplicate that looks identical to the start,
+     wrapping with no visible seam. Columns alternate direction and speed
+     so the drift feels organic rather than synchronized. */
+  @keyframes vmarquee-up {
+    to {
+      transform: translateY(-50%);
+    }
+  }
+
+  @keyframes vmarquee-down {
+    from {
+      transform: translateY(-50%);
+    }
+    to {
+      transform: translateY(0);
+    }
+  }
+
+  .animate-vmarquee-up-slow {
+    animation: vmarquee-up 26s linear infinite;
+  }
+
+  .animate-vmarquee-down {
+    animation: vmarquee-down 30s linear infinite;
+  }
+
+  .animate-vmarquee-up-slower {
+    animation: vmarquee-up 36s linear infinite;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .animate-vmarquee-up-slow,
+    .animate-vmarquee-down,
+    .animate-vmarquee-up-slower {
+      animation: none;
+    }
+  }
+
+  /* Tech Stack card spotlight border (S14 addendum) — same padding-box /
+     full-layer XOR mask trick as .gradient-border-card below, but the
+     background is a radial gradient centered on --mx/--my instead of a
+     fixed-angle linear one, so the lit ring segment tracks the cursor
+     (TechStack.tsx sets --mx/--my via a plain DOM mutation on
+     mousemove, no React state). Pointer-only: scoped entirely inside
+     (hover: hover) so the ::before never even generates on touch, which
+     gets a separate (hover: none) :active border-color fallback instead. */
+  @media (hover: hover) {
+    .spotlight-card {
+      position: relative;
+    }
+
+    .spotlight-card::before {
+      content: "";
+      position: absolute;
+      inset: -1.6px;
+      border-radius: inherit;
+      padding: 1.6px;
+      background: radial-gradient(
+        120px circle at var(--mx, 50%) var(--my, 50%),
+        var(--color-violet),
+        var(--color-gold) 45%,
+        transparent 75%
+      );
+      -webkit-mask:
+        linear-gradient(#000 0 0) content-box,
+        linear-gradient(#000 0 0);
+      -webkit-mask-composite: xor;
+      mask-composite: exclude;
+      opacity: 0;
+      transition: opacity 0.25s ease;
+      pointer-events: none;
+    }
+
+    .spotlight-card:hover::before {
+      opacity: 1;
+    }
+
+    .spotlight-card:hover {
+      box-shadow: 0 10px 26px rgba(91, 33, 182, 0.14);
+    }
+  }
+
+  @media (hover: hover) and (prefers-reduced-motion: reduce) {
+    .spotlight-card::before {
+      transition: none;
+    }
+  }
+
+  @media (hover: none) {
+    .spotlight-card:active {
+      border-color: var(--color-violet);
+    }
+  }
+
+  /* Animated violet→gold ring on card hover — shared by the Values grid
+     (S7, rounded cards) and the Services scroll-stack (S8, sharp
+     corners): `border-radius: inherit` picks up whichever the card
+     itself uses. The ::before is padded 1.5px and double-masked
+     (content-box layer XOR'd against a full layer) so only that 1.5px
+     ring paints, not a filled background. Opacity-faded in, not
+     layout-affecting, so it's safe to leave animated; only the
+     transition itself is dropped under prefers-reduced-motion (the ring
+     still appears on hover, just without an animated fade). */
+  .gradient-border-card {
+    position: relative;
+  }
+
+  .gradient-border-card::before {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    padding: 1.5px;
+    background: linear-gradient(130deg, var(--color-violet), var(--color-gold));
+    -webkit-mask:
+      linear-gradient(#000 0 0) content-box,
+      linear-gradient(#000 0 0);
+    -webkit-mask-composite: xor;
+    mask-composite: exclude;
+    opacity: 0;
+    transition: opacity 0.3s ease;
+    pointer-events: none;
+  }
+
+  .gradient-border-card:hover::before {
+    opacity: 1;
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .gradient-border-card::before {
+      transition: none;
+    }
+  }
+}
+
+/* ===== Teams we've shipped for (S5) — wordmark row =====
+   Real client names only, rendered as plain typographic wordmarks (no logo
+   image assets exist, and §3 honesty guardrails forbid fabricated big-brand
+   logos) — see Trusted.tsx. Entrance is a blur-to-sharp reveal staggered via
+   --logo-delay (index * 90ms, set inline per mark), triggered once by adding
+   .logo-in to the row's ancestor (single IntersectionObserver on the row,
+   Trusted.tsx) rather than one observer per mark. Resting opacity is a
+   deliberately dimmed .85, not 1 — hover lifts to full 1 so the row reads as
+   quiet/restrained until you engage with it. The hover rule's selector is
+   prefixed with the full `.logo-row.logo-in` chain purely so its specificity
+   (0,4,0) beats the entrance end-state rule below (0,3,0); a bare
+   `.logo-mark:hover` would otherwise lose to it once revealed. */
+.logo-mark {
+  display: inline-block;
+  opacity: 0;
+  filter: blur(8px);
+  transform: translateY(14px);
+  transition:
+    opacity 750ms cubic-bezier(.22, 1, .36, 1) var(--logo-delay, 0ms),
+    filter 750ms cubic-bezier(.22, 1, .36, 1) var(--logo-delay, 0ms),
+    transform 750ms cubic-bezier(.22, 1, .36, 1) var(--logo-delay, 0ms);
+}
+
+.logo-row.logo-in .logo-mark {
+  opacity: .85;
+  filter: blur(0);
+  transform: translateY(0);
+}
+
+.logo-row.logo-in .logo-mark:hover {
+  opacity: 1;
+  transition: opacity 200ms ease;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .logo-mark {
+    opacity: .85;
+    filter: none;
+    transform: none;
+    transition: opacity 200ms ease;
+  }
+}
+
+/* ===== What we do — pinned stacking cards. Append to globals.css ===== */
+.svc-sec { position: relative; height: 640vh; background: #F0EEFF; }
+.svc-pin {
+  position: sticky; top: 0; height: 100vh;
+  display: grid; grid-template-columns: 1fr 1.18fr; gap: 48px; align-items: center;
+  max-width: 1200px; margin: 0 auto; padding: 0 40px;
+}
+.svc-left { position: relative; }
+.svc-ghost {
+  position: absolute; top: -70px; left: -4px;
+  font-family: var(--font-display), sans-serif; font-weight: 800; font-size: 80px;
+  color: rgba(91,33,182,.06); letter-spacing: -.02em; pointer-events: none; white-space: nowrap;
+}
+.svc-e {
+  position: relative; font-size: 12px; font-weight: 700; letter-spacing: .09em;
+  text-transform: uppercase; color: #5B21B6; margin-bottom: 12px;
+}
+.svc-h2 { position: relative; font-family: var(--font-display), sans-serif; font-size: 40px; font-weight: 800; line-height: 1.14; color: #1A1A2E; }
+.svc-p { position: relative; color: #6B7280; font-size: 15px; line-height: 1.7; margin-top: 18px; max-width: 400px; }
+/* .svc-btn removed — the CTA now renders via the shared ButtonPrimary component. */
+.svc-prog { margin-top: 26px; display: flex; gap: 8px; }
+.svc-prog i { width: 26px; height: 4px; border-radius: 2px; background: #EDE9FE; transition: .3s; }
+.svc-prog i.on { background: #5B21B6; }
+
+/* stack container is taller than one card, so the next card peeks below */
+.svc-stack { position: relative; height: 318px; overflow: hidden; }
+.svc-card {
+  position: absolute; left: 0; right: 0; top: 0; height: 240px;
+  background: #fff; border: .5px solid #E5E7EB; padding: 30px 44px;
+  box-shadow: 0 22px 44px rgba(26,26,46,.13);
+  display: flex; flex-direction: column; justify-content: center; will-change: transform;
+}
+.svc-card::before {
+  content: ""; position: absolute; inset: 0; padding: 1.5px;
+  background: linear-gradient(130deg, #5B21B6, #F5C518);
+  padding: 1.5px !important;
+  -webkit-mask: linear-gradient(#000 0 0) content-box, linear-gradient(#000 0 0);
+  -webkit-mask-composite: xor; mask-composite: exclude;
+  opacity: 0; transition: opacity .3s; pointer-events: none;
+}
+.svc-card:hover::before { opacity: 1; }
+.svc-card:hover { box-shadow: 0 26px 54px rgba(91,33,182,.22); }
+.svc-ic {
+  width: 52px; height: 52px; border-radius: 14px; background: #F0EEFF; color: #5B21B6;
+  display: flex; align-items: center; justify-content: center; font-size: 23px; margin-bottom: 16px; transition: .3s;
+}
+.svc-card:hover .svc-ic { background: #5B21B6; color: #fff; transform: scale(1.06); }
+.svc-title { font-family: var(--font-display), sans-serif; font-size: 25px; font-weight: 800; line-height: 1.15; margin-bottom: 8px; max-width: 460px; color: #1A1A2E; }
+.svc-desc { color: #6B7280; font-size: 15px; line-height: 1.7; max-width: 460px; }
+.svc-no { position: absolute; top: 28px; right: 40px; font-family: var(--font-display), sans-serif; font-weight: 800; font-size: 15px; color: #EDE9FE; }
+
+/* ---- mobile / reduced-motion: normal vertical list, no pin, no stacking ---- */
+@media (max-width: 820px) {
+  .svc-sec { height: auto; }
+  .svc-pin { position: static; height: auto; grid-template-columns: 1fr; gap: 24px; padding: 60px 24px; }
+  .svc-ghost { display: none; }
+  .svc-h2 { font-size: 30px; }
+  .svc-stack { height: auto; overflow: visible; display: flex; flex-direction: column; gap: 16px; }
+  .svc-card { position: static; height: auto; transform: none !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .svc-sec { height: auto; }
+  .svc-pin { position: static; height: auto; }
+  .svc-stack { height: auto; overflow: visible; display: flex; flex-direction: column; gap: 16px; }
+  .svc-card { position: static; height: auto; transform: none !important; }
+}
+
+/* ===== Case Studies (S9) ===== */
+.cs-section { background: #F5F3FF; }
+.cs-container { max-width: 1080px; margin: 0 auto; padding: 70px 30px; }
+.cs-eyebrow { font-size: 12px; font-weight: 700; text-transform: uppercase; color: #5B21B6; }
+.cs-heading { font-family: var(--font-display), sans-serif; font-size: 40px; font-weight: 800; margin: 8px 0 40px; }
+
+.cs-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; }
+@media (max-width: 700px) {
+  .cs-grid { grid-template-columns: 1fr; }
+}
+
+/* Entrance: opacity/transform carry --cs-delay (set inline per card, 110ms
+   apart) so the stagger only affects the one-time reveal. Once .cs-in is
+   applied, this whole `transition` declaration is superseded by
+   .cs-card.cs-in's own (higher-specificity, zero-delay) declaration below,
+   so every subsequent hover/defocus transform change is instant — the
+   entrance delay can't leak into later interactions. */
+.cs-card {
+  position: relative;
+  display: block;
+  height: 340px;
+  border-radius: 18px;
+  overflow: hidden;
+  border: 1px solid #E5E7EB;
+  background: #fff;
+  text-decoration: none;
+  opacity: 0;
+  transform: translateY(26px) scale(.97);
+  transition:
+    opacity .65s cubic-bezier(.34, 1.45, .64, 1) var(--cs-delay, 0ms),
+    transform .65s cubic-bezier(.34, 1.45, .64, 1) var(--cs-delay, 0ms);
+}
+
+.cs-card.cs-in {
+  opacity: 1;
+  transform: translateY(0) scale(1);
+  transition:
+    opacity .3s cubic-bezier(.34, 1.45, .64, 1),
+    transform .3s cubic-bezier(.34, 1.45, .64, 1),
+    border-color .3s cubic-bezier(.34, 1.45, .64, 1),
+    box-shadow .3s cubic-bezier(.34, 1.45, .64, 1);
+}
+
+.cs-card:hover {
+  transform: scale(1.03);
+  border-color: #d8d2f0;
+  box-shadow: 0 24px 56px rgba(91, 33, 182, .28), 0 6px 18px rgba(245, 197, 24, .14);
+}
+
+/* Grid-level focus mode: hovering the grid dims/shrinks every card except
+   the one actually under the cursor. */
+.cs-grid:hover .cs-card:not(:hover) {
+  transform: scale(.97);
+  opacity: .72;
+}
+
+.cs-img {
+  object-fit: cover;
+  transition: transform .6s cubic-bezier(.34, 1.45, .64, 1);
+}
+.cs-card:hover .cs-img {
+  transform: scale(1.06);
+}
+.cs-img-placeholder {
+  position: absolute;
+  inset: 0;
+  background: #EDE9FE;
+}
+
+/* Bottom scrim, sized to its own content (not the full card). The tag +
+   title always render in full — nothing clips them. Only cs-desc/cs-meta
+   collapse to zero height at rest (see below), so the overlay itself
+   naturally hugs "just the tag + title" until hover grows it. */
+.cs-overlay {
+  position: absolute;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  padding: 26px;
+  background: linear-gradient(to top, rgba(26, 26, 46, .92) 30%, rgba(26, 26, 46, .55) 70%, transparent);
+}
+
+.cs-tag {
+  display: inline-block;
+  background: #F5C518;
+  color: #1A1A2E;
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.cs-title {
+  margin: 10px 0 0;
+  color: #fff;
+  font-family: var(--font-display), sans-serif;
+  font-size: 21px;
+  font-weight: 800;
+}
+
+.cs-desc {
+  margin: 8px 0 0;
+  color: #CBD5E1;
+  font-size: 13px;
+  line-height: 1.5;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity .3s cubic-bezier(.34, 1.45, .64, 1),
+    transform .3s cubic-bezier(.34, 1.45, .64, 1),
+    max-height .3s cubic-bezier(.34, 1.45, .64, 1);
+}
+.cs-card:hover .cs-desc {
+  max-height: 90px;
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: .06s;
+}
+
+.cs-meta {
+  margin-top: 0;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  max-height: 0;
+  overflow: hidden;
+  opacity: 0;
+  transform: translateY(10px);
+  transition:
+    opacity .3s cubic-bezier(.34, 1.45, .64, 1),
+    transform .3s cubic-bezier(.34, 1.45, .64, 1),
+    max-height .3s cubic-bezier(.34, 1.45, .64, 1),
+    margin-top .3s cubic-bezier(.34, 1.45, .64, 1);
+}
+.cs-card:hover .cs-meta {
+  margin-top: 14px;
+  max-height: 50px;
+  opacity: 1;
+  transform: translateY(0);
+  transition-delay: .12s;
+}
+
+.cs-chip {
+  background: rgba(255, 255, 255, .14);
+  color: #fff;
+  font-size: 11px;
+  font-weight: 600;
+  padding: 4px 10px;
+  border-radius: 999px;
+}
+
+.cs-view {
+  margin-left: auto;
+  color: #F5C518;
+  font-size: 12px;
+  font-weight: 700;
+  text-transform: uppercase;
+  white-space: nowrap;
+}
+
+.cs-button-row {
+  margin-top: 40px;
+  display: flex;
+  justify-content: center;
+}
+
+/* .cs-btn / .cs-btn-arrow removed — "See all work" now renders via the
+   shared ButtonSecondary component. */
+
+/* Mobile: no hover on touch, so the overlay/description/meta are just
+   permanently in their "revealed" state instead of gated behind :hover. */
+@media (max-width: 700px) {
+  .cs-desc { opacity: 1; transform: translateY(0); max-height: 90px; }
+  .cs-meta { opacity: 1; transform: translateY(0); max-height: 50px; margin-top: 14px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .cs-card,
+  .cs-card.cs-in,
+  .cs-overlay,
+  .cs-desc,
+  .cs-meta,
+  .cs-img {
+    transition: none !important;
+  }
+}
+
+/* ===== Testimonials (S12) — scroll-driven pinned stage =====
+   .tst-quote-stage and .tst-meta-stage are the real grid children (one per
+   column) — each is `position: relative; min-width: 0; overflow: hidden`,
+   so the `position: absolute; inset: 0` slides nested inside them size
+   against THAT column only. (An earlier version tried to skip these
+   wrappers by putting `grid-column` directly on the individual slides —
+   in theory a `position: absolute` grid item with explicit placement
+   should resolve `inset` against its assigned grid area, but that did not
+   hold up in practice, and the slides rendered at close to the full stage
+   width instead of their column's width. Real wrapper elements are the
+   robust fix.) Each wrapper holds all 3 of that column's slides stacked on
+   top of each other via `inset: 0`.
+
+   The DOM is still [stage-of-3-quotes, stage-of-3-metas], which would
+   naturally fall back to "all quotes, then all metas" once the grid is
+   gone — instead, the fallback below turns both wrappers into
+   `display: contents` (promoting their slide children to be direct flex
+   items of .tst-stage) and each slide carries an inline `order`
+   (`quote_i = 2i`, `meta_i = 2i+1`, set in Testimonials.tsx) so the
+   fallback still pairs each quote with its own meta card, without the
+   pinned-mode DOM needing to be interleaved. */
+.tst-section {
+  position: relative;
+  height: 140vh;
+  padding: 0 30px;
+}
+
+.tst-stage {
+  position: sticky;
+  top: max(14vh, 100px);
+  max-width: 1200px;
+  margin: 0 auto;
+  border-radius: 26px;
+  padding: 44px;
+  overflow: hidden;
+  background: linear-gradient(150deg, #F5F3FF, #FDF2F8);
+  display: grid;
+  grid-template-columns: 1.3fr .7fr;
+  gap: 36px;
+  align-items: center;
+}
+
+.tst-ambient {
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  opacity: .55;
+  transition: background 1s;
+  pointer-events: none;
+}
+.tst-ambient-0 { background: radial-gradient(500px circle at 80% 10%, rgba(91, 33, 182, .16), transparent 60%); }
+.tst-ambient-1 { background: radial-gradient(500px circle at 20% 90%, rgba(37, 99, 235, .15), transparent 60%); }
+.tst-ambient-2 { background: radial-gradient(500px circle at 85% 85%, rgba(245, 197, 24, .16), transparent 60%); }
+
+.tst-eyebrow {
+  position: absolute;
+  top: 22px;
+  left: 44px;
+  z-index: 1;
+  font-size: 11.5px;
+  font-weight: 700;
+  text-transform: uppercase;
+  color: #5B21B6;
+}
+
+.tst-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  z-index: 1;
+  display: flex;
+  gap: 8px;
+}
+.tst-segment {
+  flex: 1;
+  height: 3px;
+  border-radius: 2px;
+  background: rgba(91, 33, 182, .14);
+  overflow: hidden;
+}
+.tst-segment-fill {
+  height: 100%;
+  width: 0%;
+  background: linear-gradient(90deg, #5B21B6, #F5C518);
+}
+
+.tst-quote-stage,
+.tst-meta-stage {
+  position: relative;
+  min-width: 0;
+  min-height: 230px;
+  overflow: hidden;
+  z-index: 1;
+}
+.tst-quote-stage { grid-column: 1; }
+.tst-meta-stage { grid-column: 2; }
+
+.tst-quote-slide,
+.tst-meta-slide {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  opacity: 0;
+  transform: scale(.93);
+  filter: blur(6px);
+  transition:
+    opacity .5s cubic-bezier(.22, 1, .36, 1),
+    transform .5s cubic-bezier(.22, 1, .36, 1),
+    filter .5s cubic-bezier(.22, 1, .36, 1);
+  pointer-events: none;
+}
+.tst-meta-slide { gap: 12px; }
+
+.tst-quote-slide.tst-active,
+.tst-meta-slide.tst-active {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  pointer-events: auto;
+}
+
+/* Independent per-element stagger inside an active slide — each of these
+   two elements starts from this same rest state and settles on its own
+   delay once its parent slide activates. */
+.tst-quote,
+.tst-glass {
+  opacity: 0;
+  transform: translateY(14px) scale(.98);
+  filter: blur(4px);
+  transition:
+    opacity .55s cubic-bezier(.34, 1.45, .64, 1),
+    transform .55s cubic-bezier(.34, 1.45, .64, 1),
+    filter .55s cubic-bezier(.34, 1.45, .64, 1);
+}
+
+.tst-quote {
+  font-family: var(--font-display), sans-serif;
+  font-size: clamp(18px, 2vw, 22px);
+  font-weight: 800;
+  line-height: 1.48;
+  color: #1A1A2E;
+  max-width: 100%;
+}
+.tst-quote-slide.tst-active .tst-quote {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  transition-delay: .02s;
+}
+
+.tst-glass {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  background: rgba(255, 255, 255, .75);
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, .9);
+  border-radius: 16px;
+  padding: 18px;
+}
+.tst-meta-slide.tst-active .tst-glass {
+  opacity: 1;
+  transform: none;
+  filter: none;
+  transition-delay: .09s;
+}
+
+.tst-name {
+  font-family: var(--font-display), sans-serif;
+  font-weight: 700;
+  font-size: 14px;
+  color: #1A1A2E;
+}
+
+/* No pin below 760px or under reduced motion: plain static stacked list,
+   each quote immediately followed by its own meta card — no transforms.
+   Pure CSS override, not a JS-branched render, so there's no hydration
+   mismatch. .tst-quote-stage/.tst-meta-stage collapse to `display:
+   contents`, promoting their slide children to be direct flex items of
+   .tst-stage; each slide's inline `order` (set in Testimonials.tsx) then
+   interleaves them into paired quote/meta order regardless of the
+   pinned-mode DOM grouping. */
+@media (max-width: 760px), (prefers-reduced-motion: reduce) {
+  .tst-section {
+    height: auto;
+  }
+  .tst-stage {
+    position: static;
+    top: auto;
+    max-width: none;
+    margin: 0;
+    display: flex;
+    flex-direction: column;
+  }
+  .tst-ambient,
+  .tst-progress {
+    display: none;
+  }
+  .tst-quote-stage,
+  .tst-meta-stage {
+    display: contents;
+  }
+  .tst-quote-slide,
+  .tst-meta-slide {
+    position: static;
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+    pointer-events: auto;
+  }
+  /* Tight gap within a pair (meta's margin-top), loose gap between pairs
+     (meta's margin-bottom). Flex items don't collapse margins against each
+     other, but one side of every adjacent pair is 0 here, so the visible
+     gap is the same as collapsed margins would give either way. */
+  .tst-meta-slide {
+    margin-top: 12px;
+    margin-bottom: 32px;
+  }
+  .tst-quote,
+  .tst-glass {
+    opacity: 1;
+    transform: none;
+    filter: none;
+    transition: none;
+  }
+}
+
+/* ===== Discovery Call CTA — component-scoped design tokens =====
+   Deliberately a separate palette from the site's own brand tokens above
+   (--color-violet, --color-ink, etc. in @theme) — this section uses a
+   dedicated dark/indigo-violet-pink scheme per its own spec, not the site's
+   violet/gold brand colors. These are plain (non-`--color-*`) custom
+   properties, so Tailwind's utility generator doesn't pick them up as
+   theme colors and they can't collide with @theme's `--color-violet` (a
+   different property name, and a different color entirely: #5B21B6 there
+   vs #9B5CF6 here) — consumed only via arbitrary-value syntax, e.g.
+   `bg-[var(--bg-deep)]`, scoped to DiscoveryCallCTA.tsx.
+
+   --indigo / --violet / --pink / --gradient-main additionally back the
+   site-wide ButtonPrimary/ButtonSecondary components (components/ui) —
+   they're the one pair of shared tokens in this block that outgrew "DCTA
+   only", so treat them as the site's canonical button palette. */
+:root {
+  --bg-deep: #0A0714;
+  --bg-card: #17102B;
+  --card-line: rgba(196, 181, 253, 0.10);
+  --indigo: #6D5AE6;
+  --violet: #9B5CF6;
+  --pink: #EC4899;
+  --text-hi: #F6F3FF;
+  --text-mid: #B9AEDD;
+  --text-low: #7B7099;
+  --gradient-main: linear-gradient(135deg, #6D5AE6 0%, #9B5CF6 55%, #EC4899 100%);
+}
+
+/* ===== FAQ Section — component-scoped design tokens =====
+   Same "new design language" as the Discovery Call CTA block above, but a
+   fully separate prefixed set (--faq-*) rather than reusing those tokens
+   directly. Several names would otherwise collide: --bg-card, --text-hi
+   and --text-mid need DIFFERENT values here (FAQ is a light card on a
+   light page; DCTA is a dark card on a dark page), and :root custom
+   properties are global — redeclaring the bare name in a second :root
+   block doesn't scope to this component, it overwrites the first
+   declaration site-wide. Prefixing avoids that, even for the values
+   (indigo/violet/pink/gradient-main) that happen to be identical today. */
+:root {
+  --faq-bg-page: #F3EFFC;
+  --faq-bg-card: #FFFFFF;
+  --faq-border: rgba(23, 17, 42, 0.07);
+  --faq-border-strong: rgba(23, 17, 42, 0.13);
+  --faq-text-hi: #161020;
+  --faq-text-mid: #6E6690;
+  --faq-indigo: #6D5AE6;
+  --faq-violet: #9B5CF6;
+  --faq-pink: #EC4899;
+  --faq-gradient-main: linear-gradient(135deg, #6D5AE6 0%, #9B5CF6 55%, #EC4899 100%);
+  --faq-shadow-rest: 0 1px 2px rgba(30, 20, 60, 0.04), 0 6px 20px -14px rgba(76, 29, 149, 0.10);
+  --faq-shadow-open: 0 16px 36px -14px rgba(109, 90, 230, 0.28);
+}
+
+/* ===== Contact Section — component-scoped design tokens =====
+   Same note as the FAQ block above: this is its own fully prefixed set
+   (contact dash prefixed names) rather than reusing the FAQ or DCTA
+   tokens, even though several values here (bg page, indigo, violet,
+   pink, gradient main, shadow rest) are identical to the FAQ set today
+   — keeping every component's tokens self-contained avoids one
+   accidentally changing when another is edited later. If this light
+   theme trio of tokens keeps recurring across future components,
+   consolidating into one shared set would be a reasonable follow up —
+   not done here to keep this change scoped to Contact only. */
+:root {
+  --contact-bg-page: #F3EFFC;
+  --contact-surface-offwhite: #FDFCFF;
+  --contact-surface-lavender-2: #F6F2FE;
+  --contact-bg-card: #FFFFFF;
+  --contact-border: rgba(23, 17, 42, 0.07);
+  --contact-text-hi: #161020;
+  --contact-text-mid: #6E6690;
+  --contact-text-low: #9B93B8;
+  --contact-indigo: #6D5AE6;
+  --contact-violet: #9B5CF6;
+  --contact-pink: #EC4899;
+  --contact-green: #22C55E;
+  --contact-gradient-main: linear-gradient(135deg, #6D5AE6 0%, #9B5CF6 55%, #EC4899 100%);
+  --contact-shadow-rest: 0 1px 2px rgba(30, 20, 60, 0.04), 0 6px 20px -14px rgba(76, 29, 149, 0.10);
+  --contact-shadow-lift: 0 24px 54px -18px rgba(109, 90, 230, 0.32);
+}
+
+/* Mesh background drift — three radial gradients on one element, their
+   shared background-position nudged a few percentage points and back over
+   an 11s loop. Kept deliberately subtle per spec ("if in doubt, reduce the
+   movement distance"). */
+@keyframes contact-mesh-drift {
+  0%,
+  100% {
+    background-position: 25% 30%, 75% 25%, 50% 85%;
+  }
+  50% {
+    background-position: 29% 26%, 71% 29%, 46% 81%;
+  }
+}
+
+.contact-mesh {
+  background-color: var(--contact-surface-lavender-2);
+  background-image:
+    radial-gradient(circle, rgba(109, 90, 230, 0.36), transparent 60%),
+    radial-gradient(circle, rgba(236, 72, 153, 0.28), transparent 60%),
+    radial-gradient(circle, rgba(155, 92, 246, 0.32), transparent 60%);
+  background-repeat: no-repeat;
+  background-position: 25% 30%, 75% 25%, 50% 85%;
+  background-size: 130% 130%;
+  animation: contact-mesh-drift 11s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .contact-mesh {
+    animation: none;
+  }
+}
+
+/* Left-column detail rail — frosted glass so it reads against the mesh
+   (a flat near-white icon chip nearly disappeared against the mesh's
+   lightest patches). Solid rgba(255,255,255,0.92) is the base/fallback
+   for browsers without backdrop-filter support; the @supports block
+   layers the actual blur + lower opacity on top only where the browser
+   can render it. */
+.contact-detail-panel {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.75);
+  border-radius: 20px;
+  padding: 28px;
+  box-shadow: 0 4px 24px -12px rgba(76, 29, 149, 0.18);
+}
+
+.contact-detail-icon-chip {
+  background: rgba(255, 255, 255, 0.92);
+  border: 1px solid rgba(255, 255, 255, 0.9);
+  box-shadow: 0 2px 8px rgba(76, 29, 149, 0.08);
+}
+
+@supports (backdrop-filter: blur(1px)) or (-webkit-backdrop-filter: blur(1px)) {
+  .contact-detail-panel {
+    background: rgba(255, 255, 255, 0.55);
+    backdrop-filter: blur(16px);
+    -webkit-backdrop-filter: blur(16px);
+  }
+
+  .contact-detail-icon-chip {
+    background: rgba(255, 255, 255, 0.72);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+  }
+}
+
+/* ===== Work / case-study detail pages — component-scoped design tokens =====
+   Ported from design-refs/design-final-updated.html. Same scoping pattern as
+   the Discovery/FAQ/Contact blocks above: a fully separate visual language
+   (own navy, own gold-text warning tone, own line colors) used only by
+   src/components/work/*, prefixed `--work-*` so it can't collide with (a)
+   --color-violet-mid / --color-violet-soft in the @theme block above, which
+   are DIFFERENT hex values than this design's own violet-mid/violet-soft,
+   and (b) the unrelated `.cs-*` classes above (S9 homepage case-study
+   teaser grid — a different component with a different design). */
+:root {
+  --work-violet: #5b21b6;
+  --work-violet-mid: #7c3aed;
+  --work-violet-soft: #f3effc;
+  --work-violet-edge: #ddd2f5;
+  --work-gold: #f5c518;
+  --work-gold-soft: #fef7e0;
+  --work-navy: #1a1a2e;
+  --work-navy-2: #242440;
+  --work-ink2: #4e4c63;
+  --work-ink3: #8e8da3;
+  --work-tint: #f7f6fb;
+  --work-line: #e9e7f2;
+  --work-line2: #d8d5e8;
+  --work-grad: linear-gradient(90deg, #5b21b6 0%, #7c3aed 45%, #f5c518 100%);
+}
+
+.work-grad-text {
+  background: var(--work-grad);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+.work-grad-bar {
+  background: var(--work-grad);
+}
+
+/* Sits behind every case-study image slot (hero, solution steps). Real
+   next/image is always rendered on top at full `fill` size — this only
+   shows through where the image hasn't loaded (path doesn't exist yet, or a
+   genuine 404 in production), so there's no runtime filesystem check and no
+   client-side error handling needed. Same tri-stop gradient as the source
+   design's generic `.ph` placeholder box. */
+.work-img-fallback {
+  background: linear-gradient(150deg, #ede7fa, #f7f6fb 50%, #fef7e0);
+}
