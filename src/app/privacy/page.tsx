@@ -20,7 +20,7 @@ const sections = [
   { id: "sharing", title: "Sharing with Meta and other providers" },
   { id: "opt-out", title: "Opting out of messages" },
   { id: "retention", title: "How long we keep data" },
-  { id: "deletion", title: "Deleting your data" },
+  { id: "deleting-your-data", title: "Deleting your data" },
   { id: "your-rights", title: "Your rights" },
   { id: "security", title: "Security" },
   { id: "children", title: "Children" },
@@ -52,6 +52,17 @@ export default function PrivacyPage() {
         This policy explains what personal data Tresto collects when you contact us through our website or
         message us on WhatsApp, why we use it, who we share it with, and how you can stop messages or ask us
         to delete your data.
+      </p>
+      <p className="mt-4 max-w-3xl text-base leading-[1.7] text-text-muted">
+        <strong className="text-ink">Data deletion instructions:</strong> email{" "}
+        <a href={`mailto:${CONTACT_EMAIL}`} className="font-medium text-violet hover:underline">
+          {CONTACT_EMAIL}
+        </a>{" "}
+        with the subject &ldquo;Data deletion request&rdquo; and the phone number you used to message us. See{" "}
+        <a href="#deleting-your-data" className="font-medium text-violet hover:underline">
+          Deleting your data
+        </a>{" "}
+        for details.
       </p>
 
       <div className="mt-12 grid gap-12 lg:grid-cols-[240px_1fr]">
@@ -156,7 +167,7 @@ export default function PrivacyPage() {
             <ul>
               <li>Cloud hosting and database providers that store our data and run our applications.</li>
               <li>Email delivery providers that send our replies and notifications.</li>
-              <li>AI service providers that help our chatbot understand and answer messages.</li>
+              <li>AI service providers that may help our chatbot understand and answer messages.</li>
             </ul>
             <p>
               These providers may process data outside India. They may only use it to provide their service to
@@ -166,13 +177,18 @@ export default function PrivacyPage() {
 
           <PolicySection id="opt-out" title="Opting out of messages">
             <p>
-              You can stop marketing messages at any time by replying <strong>STOP</strong> to any of our
-              WhatsApp messages. Our system records this automatically and stops sending you marketing
-              campaigns straight away.
+              You can stop marketing messages at any time: reply <strong>STOP</strong>,{" "}
+              <strong>UNSUBSCRIBE</strong>, <strong>OPT OUT</strong>, or <strong>STOP ALL</strong>, or tap the{" "}
+              <strong>&ldquo;Stop promotions&rdquo;</strong> button on a marketing message. Our system records
+              this automatically and stops sending you marketing campaigns straight away.
             </p>
             <p>
-              We may still reply when you message us, and send messages you need about a service you asked for.
-              You can also block our number in WhatsApp, or email {mail} to opt out.
+              Opting out stops marketing campaigns only. We may still reply to messages you send us, and send
+              messages about a service you asked for. You can also block our number in WhatsApp, or email {mail}{" "}
+              to opt out.
+            </p>
+            <p>
+              To start receiving messages again, reply <strong>START</strong>.
             </p>
           </PolicySection>
 
@@ -184,7 +200,7 @@ export default function PrivacyPage() {
             </p>
           </PolicySection>
 
-          <PolicySection id="deletion" title="Deleting your data">
+          <PolicySection id="deleting-your-data" title="Deleting your data">
             <p>To ask us to delete your data:</p>
             <ul>
               <li>
