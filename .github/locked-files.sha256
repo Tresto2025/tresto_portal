@@ -2,3 +2,4 @@
 8064a6acc77de76198fbd05ac3017673a48ec356e6faaa6376aad1c5f2c42f66  next.config.ts
 dfac7ac2d86d326a0e5adb024e7943c181393ed17a5fcb8f0315b24c7da6ddde  postcss.config.mjs
 25896f393ccbbc8e615fcbd02c70914ce6c6447b0d1f28847d10f82abf3fc55a  tailwind.config.ts
+72bcedc8c328f8e77867f253ef3d87041200a9d567ffb624dc5287dee22c313e  deploy/safe-update.sh
