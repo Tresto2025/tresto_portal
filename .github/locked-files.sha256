@@ -1,0 +1,10 @@
+# sha256  path - build-config files locked against tampering (see malware guard)
+8064a6acc77de76198fbd05ac3017673a48ec356e6faaa6376aad1c5f2c42f66  next.config.ts
+dfac7ac2d86d326a0e5adb024e7943c181393ed17a5fcb8f0315b24c7da6ddde  postcss.config.mjs
+b65588922cd67b17c5a3562f0033ecef8272e67ee0c0daa6ae8656bb08f3ca71  tailwind.config.ts
+85fcd9caee39859bda3ba794be45f23e3676aabf2515acf2895b04543a5bbfd7  deploy/safe-update.sh
+18c3fa3597d9bf0a45ddb418589f597f04c7fdb8ed0c99d83e106c3226789718  .githooks/run-malware-guard
+5ebb08a0a7469acd29bd6a967d2db0b9caf64f63ae86d8695b1db38bf20a7680  .githooks/pre-commit
+c5341daf6a1e5683138cacf5f90f8dd2a1a71496c922483b7d75a61c2ecef06b  .githooks/pre-push
+836ed16353b83f559c2725ceb8e8dee911c49f1c472ca4b990f2b66b727812ec  .claude/hooks/malware-guard.sh
+12dcdbe610a1d29df5cf7890c55b77a6c84960ff4db1a7363c8c1357726863cb  SECURITY.md
